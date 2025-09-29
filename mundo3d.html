@@ -2,76 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Modelo 3D - AirDetector</title>
+  <title>Modelo 3D - GitHub Pages</title>
   <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
+    body { margin:0; overflow:hidden; }
+    canvas { display:block; }
   </style>
 </head>
 <body>
-  <script type="module">
-    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-    import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
+<script type="module">
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+import { GLTFLoader } from "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
+import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-    // Escena
-    const scene = new THREE.Scene();
+// Escena y cámara
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0,1.5,3);
 
-    // Cámara
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    camera.position.set(0, 1.5, 3);
+// Renderer
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-    // Render
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+// Controles
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
-    // Controles
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+// Luz
+const hemiLight = new THREE.HemisphereLight(0xffffff,0x444444,1);
+scene.add(hemiLight);
+const dirLight = new THREE.DirectionalLight(0xffffff,1);
+dirLight.position.set(5,10,7.5);
+scene.add(dirLight);
 
-    // Luces
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-    scene.add(hemiLight);
+// Cargar modelo GLB
+const loader = new GLTFLoader();
+loader.load("./tinker.glb", gltf => {
+    scene.add(gltf.scene);
+    console.log("✅ Modelo cargado");
+}, undefined, error => console.error("❌ Error cargando modelo:", error));
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 10, 7.5);
-    scene.add(dirLight);
+// Animación
+function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene,camera);
+}
+animate();
 
-    // Cargar modelo
-    const loader = new GLTFLoader();
-    loader.load(
-      "./tinker.glb",
-      (gltf) => {
-        scene.add(gltf.scene);
-        console.log("✅ Modelo cargado");
-      },
-      undefined,
-      (error) => {
-        console.error("❌ Error cargando modelo:", error);
-      }
-    );
-
-    // Animación
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // Ajustar al redimensionar
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+// Ajuste al cambiar tamaño de ventana
+window.addEventListener("resize", ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+});
+</script>
 </body>
 </html>
-
